@@ -18,7 +18,6 @@ class RecipeController extends Controller
     {
         //
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -26,8 +25,6 @@ class RecipeController extends Controller
      */
     public function create(Request $request)
     {
-         return json_encode($request->all());
-
         $recipe_data =$request->all();
         $image_data = explode(',',$request-> image);
         $decoded = base64_decode($image_data[1]);
@@ -53,7 +50,7 @@ class RecipeController extends Controller
 
 
         foreach($recipe_data['descriptions'] as &$des){
-            if($des != []) {
+            if($des != [] ) {
                 $description = new Description();
                 $description->step = $des['step'];
                 $description->detail = $des['detail'];
@@ -62,7 +59,7 @@ class RecipeController extends Controller
        }
 
        foreach($recipe_data['ingredients'] as &$i) {
-            if($i != []) {
+            if($i != [] && $i['name']!= '' ) {
                 $ingredient = new Ingredient();
                 $ingredient->name = $i['name'];
                 $ingredient->quantity = $i['quantity'];
@@ -81,27 +78,18 @@ class RecipeController extends Controller
 
     public function getRecipeById($id)
     {
-        $recipe_data = Recipe::findorfail($id);
-        $recipe_data->increment('clicks');
-        $recipe_data->update();
-
-        $description_array = array();
-        foreach ($recipe_data->description as $des) {
-            $description_array[]=  $des->description;
-        }
-
-        $ingredient_array = array();
-        foreach ($recipe_data->ingredient as $ins) {
-            $ingredient_array[]=  $ins->name;
-        }
+        $recipe_model = Recipe::findorfail($id);
+        $recipe_model->increment('clicks');
+        $recipe_model->update();
 
         $recipe = array( "recipe" => array(
-            "title"=> $recipe_data->title,
-            "user_name"=> $recipe_data->user->first()->name,
-            "rating" =>$recipe_data->rating,
-             "image"=> $recipe_data['image'],
-            "ingredients" => $ingredient_array,
-            "descriptions" => $description_array
+            "created_at"=> substr($recipe_model->created_at,0,19),
+            "title"=> $recipe_model->title,
+            "user_name"=> $recipe_model->user->first()->name,
+            "rating" =>$recipe_model->rating,
+             "image"=> $recipe_model['image'],
+            "ingredients" => $recipe_model->ingredient,
+            "descriptions" =>$recipe_model->description
         ));
         return json_encode($recipe);
     }
@@ -145,6 +133,34 @@ class RecipeController extends Controller
      * @param  \App\Recipe  $recipe
      * @return \Illuminate\Http\Response
      */
+
+    public function search(Request $request) {
+
+        $search_data = explode(" ",$request-> all()['search']);
+        $result = array();
+        foreach ($search_data as $i){
+            $recipe = Recipe::where('title','LIKE', '%'.$i)->get();
+            if ($recipe != null) {
+                array_push($result, $recipe);
+            }
+        }
+        if(sizeof($result) < 5) {
+            foreach ($search_data as $i){
+                $ingredient = Ingredient::where('name','LIKE', '%'.$i)
+                    ->orWhere('name','LIKE', '%'.$i)
+                    ->get();
+                if ($ingredient != null) {
+                    foreach ($ingredient  as $i) {
+                        $recipe = Recipe::find($i->recipe_id);
+                        array_push($result, $recipe);
+                    }
+                }
+            }
+        }
+
+
+        return  json_encode($result);
+    }
     public function edit(Recipe $recipe)
     {
         //

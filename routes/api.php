@@ -23,4 +23,4 @@ Route::get('/recipes/{id}',RecipeController::class.'@getRecipeById' );
 Route::get('/recipes/collections/new',RecipeController::class.'@new' );
 Route::get('/recipes/collections/recent',RecipeController::class.'@recent');
 Route::post('/recipes/create',RecipeController::class.'@create' );
-Route::post('/recipes/ingredient',RecipeController::class.'@ingredient' );
+Route::post('/recipes/search',RecipeController::class.'@search' );

@@ -12,8 +12,10 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <link href='/resources/assets/my.css' rel="stylesheet" type="text/css" >
 </head>
-<body>
+<body id="mybody">
     <div id="app">
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container">

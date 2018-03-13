@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -27,7 +28,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = 'http://localhost:8080/';
+    protected $redirectTo = 'http://';
 
     /**
      * Create a new controller instance.
@@ -60,21 +61,27 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
-    protected function create(array $data)
+    protected function create(Request $request)
     {
-        $user = new User();
-        $user -> name =  $data['name'];
-        $user -> username = $data['name'];
-        $user -> email = $data['email'];
-        $user ->  password = bcrypt($data['password']);
-        $user -> touch();
-        $user -> save();
-        return $user;
-//        return new User([
-//            'name' =>
-//            'username' => $data['name'],
-//            'email' => $data['email'],
-//            'password' => bcrypt($data['password']),
-//        ]);
+         $data = $request->all();
+
+          User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password'])
+        ]);
+
+
+        dump(validator($data));
+
+//        $params = [
+//            'grant_type' => 'password',
+//            'client_id' => $this->client->id,
+//            'client_secret' => $this->client->secret,
+//            'username' => $request('email'),
+//            'password' => $request('password'),
+//             'scope' => '*'
+//        ];
+
     }
 }

@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Http\Request;
 
 /*
@@ -13,26 +12,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
-Route::get('/admin','UserController@admin' );
-Route::post('/admin','UserController@admin' );
-
-Route::get('/users','UserController@users' );
-
-Route::get('/users/{id}','UserController@getUser' );
-
-
-Route::post('/users/create',UserController::class.'@create' );
-
+Route::middleware('auth:api')->get('/user',UserController::class.'@getUser');
+Route::post('/register',UserController::class.'@create');
 Route::get('/users/update',UserController::class.'@update' );
+Route::get('/favorite',UserController::class.'@favorite');
+Route::get('/kitchen/{id}',RecipeController::class.'@kitchen');
 
-Route::get('/recipes/hot',RecipeController::class.'@hot' );
-
-Route::get('/recipes/{id}/get',RecipeController::class.'@getRecipeByid' );
-Route::get('/recipes/new',RecipeController::class.'@new' );
-Route::get('/recipes/recent',RecipeController::class.'@recent' );
+Route::get('/recipes/collections/hot',RecipeController::class.'@hot' );
+Route::get('/recipes/{id}',RecipeController::class.'@getRecipeById' );
+Route::get('/recipes/collections/new',RecipeController::class.'@new' );
+Route::get('/recipes/collections/recent',RecipeController::class.'@recent');
 Route::post('/recipes/create',RecipeController::class.'@create' );
+Route::post('/recipes/ingredient',RecipeController::class.'@ingredient' );

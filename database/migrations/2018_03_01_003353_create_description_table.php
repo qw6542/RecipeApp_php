@@ -16,7 +16,8 @@ class CreateDescriptionTable extends Migration
     {
         Schema::create('description', function (Blueprint $table) {
             $table->increments('id');
-            $table->longText('description');
+            $table->integer('step');
+            $table->longText('detail');
             $table->integer('recipe_id')->unsigned();
             $table->timestamps();
         });

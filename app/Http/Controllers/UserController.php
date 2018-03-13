@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -21,23 +23,30 @@ class UserController extends Controller
      */
     public function create(Request $request)
     {
-        $user_json =  $request->json(['user']);
-        $user = new User;
-        $user -> name =  $user_json['name'];
-        $user -> email = $user_json['email'];
-//        $user -> password = $user_json['password'];
-        $user->touch();
-        $user->save();
+
+        $data = $request->all();
+
+         User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password'])
+        ]);
 
     }
-    /*
-    *display all recipes belong to request user
-    */
-    public function kitchen( )
-    {
-        $user = User::find (1);
-        dump($user -> recipe ->first()->title);
 
+    public function getUser( )
+    {
+        $user = Auth::user();
+         return($user);
+    }
+    /*
+    *display all recipes collections belong to request user
+    */
+
+    public function favorite( )
+    {
+//        $user = Auth::user();
+//        return $user-> recipe();
     }
     /**
      * Store a newly created resource in storage.

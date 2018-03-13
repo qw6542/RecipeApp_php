@@ -7,24 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 class Recipe extends Model
 {
     protected  $table = 'recipe';
-    /************many to one************/
+
     public function user() {
         return $this -> belongsTo(User::class);
     }
 
-    /**********many to many*********************/
+
     public function ingredient()
     {
-        return $this->belongsToMany(Ingredient::class,'recipe_ingredient');
+        return $this->hasMany(Ingredient::class,'recipe_id');
 
     }
 
-    /*********one to many relationship*****************/
+    public  function follower() {
+        return $this -> hasMany(User::class, 'recipe_id');
+    }
+
+
     public function description() {
-        return $this -> hasMany(Description::class);
+        return $this -> hasMany(Description::class,'recipe_id');
     }
 
     public function comment() {
-        return $this -> hasMany(Ingredient::class);
+        return $this -> hasMany(Ingredient::class,'recipe_id');
     }
 }

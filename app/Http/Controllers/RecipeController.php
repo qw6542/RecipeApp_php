@@ -26,47 +26,71 @@ class RecipeController extends Controller
      */
     public function create(Request $request)
     {
-        $recipe_data =  $request->json(['Recipe']);
+         return json_encode($request->all());
+
+        $recipe_data =$request->all();
+        $image_data = explode(',',$request-> image);
+        $decoded = base64_decode($image_data[1]);
+        if(str_contains($image_data[0], 'jpeg')){
+            $extension = 'jpg';
+        }
+        else {
+            $extension = 'png';
+        }
+        $filename = str_random().'.'.$extension;
+        $path = public_path().'/recipeImage/'.$filename;
+        file_put_contents($path,$decoded);
+
         $recipe = new Recipe();
         $recipe -> title = $recipe_data['title'];
-        $recipe ->  image = $recipe_data['image'];
+        $recipe -> image =$path;
         $recipe -> user_id = $recipe_data['user_id'];
         $recipe -> touch();
 
-        $user = User::find($recipe_data['user_id']);
-        $recipe = $user -> recipe() -> save($recipe);
+        $user = User::find($recipe_data['user_id'])->first();
 
-        $i_array = $recipe_data['descriptions'];
-        for($i=0; $i<sizeof($i_array);$i++){
-            $description =  new Description();
-            $description -> description = $i_array[$i];
-           $recipe -> description() -> save($description);
-        }
+         $user -> recipe() -> save($recipe);
 
-        $i_array = $recipe_data['ingredients'];
-        for($i=0; $i<sizeof($i_array);$i++){
-            $ingredient = Ingredient::where('name','=',$i_array[$i])->first();
-            if( is_null($ingredient) ) {
-                $ingredient = new Ingredient();
-                $ingredient->name = $i_array[$i];
-                $ingredient= $ingredient ->save();
+
+        foreach($recipe_data['descriptions'] as &$des){
+            if($des != []) {
+                $description = new Description();
+                $description->step = $des['step'];
+                $description->detail = $des['detail'];
+                $recipe->description()->save($description);
             }
-            $recipe ->  ingredient() -> syncWithoutDetaching($ingredient);
-        }
+       }
+
+       foreach($recipe_data['ingredients'] as &$i) {
+            if($i != []) {
+                $ingredient = new Ingredient();
+                $ingredient->name = $i['name'];
+                $ingredient->quantity = $i['quantity'];
+                $ingredient->measurement = $i['measurement'];
+                $ingredient->preparation = $i['preparation'];
+                $ingredient->get_from = $i['get_from'];
+                $recipe->ingredient()->save($ingredient);
+            }
+       }
+//            if decide to use one to many relationship
+//            $recipe ->  ingredient() -> syncWithoutDetaching($ingredient);
+
 
     }
 
-    public function getRecipeByid($id)
+
+    public function getRecipeById($id)
     {
         $recipe_data = Recipe::findorfail($id);
         $recipe_data->increment('clicks');
         $recipe_data->update();
-        $description_array;
+
+        $description_array = array();
         foreach ($recipe_data->description as $des) {
             $description_array[]=  $des->description;
         }
 
-        $ingredient_array = null;
+        $ingredient_array = array();
         foreach ($recipe_data->ingredient as $ins) {
             $ingredient_array[]=  $ins->name;
         }
@@ -81,41 +105,39 @@ class RecipeController extends Controller
         ));
         return json_encode($recipe);
     }
+    //Auxiliary function to add owner name of the recipe
+    private function addUserName(&$item) {
+        $item = $item["username"]= User::find($item->user_id)->name;
+    }
 
-    public function new(  )
+    public function new( )
     {
         $newRecipes = Recipe::all()->sortByDesc('created_at')->take(10);
-        $newRecipes = array("newRecipes" => $newRecipes );
+
+        foreach ($newRecipes as &$Recipe){
+
+            $Recipe = $this->addUserName($Recipe);
+        }
+        $newRecipes = array(
+            "recipes" => $newRecipes
+        );
         return json_encode($newRecipes);
     }
 
     public function hot( )
     {
-        $newRecipes = Recipe::all()->sort('clicks')->take(10);
-        $newRecipes = array("newRecipes" => $newRecipes );
-        return json_encode($newRecipes);
+        $hotRecipes = Recipe::all()->sortByDesc('clicks')->take(10);
+        foreach ($hotRecipes as &$recipe){
+            $recipe = $this->addUserName($recipe);
+        }
+        $hotRecipes = array("recipes" => $hotRecipes );
+        return json_encode($hotRecipes);
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Recipe  $recipe
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Recipe $recipe)
-    {
-        //
-    }
+     public  function kitchen($id) {
+         $user= User::find($id);
+         $recipes = $user -> recipe;
+         return json_encode($recipes);
+     }
 
     /**
      * Show the form for editing the specified resource.

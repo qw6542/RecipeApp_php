@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
+use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens,Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +16,7 @@ class User extends Authenticatable
      */
     protected $table = 'user';
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password'
     ];
 
     /**
@@ -25,18 +25,21 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
     ];
 
     public  function recipe() {
-        return $this -> hasMany(Recipe::class);
+        return $this -> hasMany(Recipe::class, 'user_id');
+    }
+    public  function favorite() {
+        return $this -> hasMany(Recipe::class, 'user_id');
     }
 
     public  function question() {
-        return $this -> hasMany(Question::class);
+        return $this -> hasMany(Question::class, 'user_id');
     }
 
     public  function comment() {
-        return $this -> hasMany(Comment::class);
+        return $this -> hasMany(Comment::class, 'user_id');
     }
 }

@@ -9,7 +9,12 @@ class ingredient extends Model
 
     public function recipe()
     {
-        return $this->belongsToMany(Recipe::class,'recipe_ingredient');
+        return $this->belongsTo(Recipe::class);
 
     }
+    public function Alias()
+    {
+        return $this->hasMany(Alia::class,'ingredient_id');
+    }
+
 }

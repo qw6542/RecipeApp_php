@@ -36,7 +36,6 @@ class RecipeController extends Controller
         }
         $filename = str_random().'.'.$extension;
         $path = public_path().'/recipeImage/'.$filename;
-//        $path = asset('img/1.jpg');
         file_put_contents($path,$decoded);
 
         $recipe = new Recipe();
@@ -106,7 +105,6 @@ class RecipeController extends Controller
         foreach ($newRecipes as &$Recipe){
 
             $Recipe = $this->addUserName($Recipe);
-//            $Recipe['image'] = asset(public_path().'/recipeImage/'.$Recipe['image']);
         }
 
         foreach ($newRecipes as $Recipe){

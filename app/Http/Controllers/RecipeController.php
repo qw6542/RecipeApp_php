@@ -35,7 +35,8 @@ class RecipeController extends Controller
             $extension = 'png';
         }
         $filename = str_random().'.'.$extension;
-        $path = public_path().'/recipeImage/'.$filename;
+//        $path = public_path().'/recipeImage/'.$filename;
+        $path = asset('img/1.jpg');
         file_put_contents($path,$decoded);
 
         $recipe = new Recipe();

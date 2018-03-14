@@ -25,6 +25,6 @@ Route::get('/recipes/collections/recent',RecipeController::class.'@recent');
 Route::post('/recipes/create',RecipeController::class.'@create' );
 Route::post('/recipes/search',RecipeController::class.'@search' );
 
-//Route::get('dist/{vue_capture?}', function () {
-//    return view('vue.index');
-//})->where('vue_capture', '[\/\w\.-]*');
+Route::get('dist/{vue_capture?}', function () {
+    return view('vue.index');
+})->where('vue_capture', '[\/\w\.-]*');

@@ -35,13 +35,13 @@ class RecipeController extends Controller
             $extension = 'png';
         }
         $filename = str_random().'.'.$extension;
-//        $path = public_path().'/recipeImage/'.$filename;
-        $path = asset('img/1.jpg');
+        $path = public_path().'/recipeImage/'.$filename;
+//        $path = asset('img/1.jpg');
         file_put_contents($path,$decoded);
 
         $recipe = new Recipe();
         $recipe -> title = $recipe_data['title'];
-        $recipe -> image =$path;
+        $recipe -> image =$filename;
         $recipe -> user_id = $recipe_data['user_id'];
         $recipe -> touch();
 
@@ -96,7 +96,7 @@ class RecipeController extends Controller
     }
     //Auxiliary function to add owner name of the recipe
     private function addUserName(&$item) {
-        $item = $item["username"]= User::find($item->user_id)->name;
+        $item["username"]= User::find($item->user_id)->name;
     }
 
     public function new( )
@@ -106,6 +106,11 @@ class RecipeController extends Controller
         foreach ($newRecipes as &$Recipe){
 
             $Recipe = $this->addUserName($Recipe);
+//            $Recipe['image'] = asset(public_path().'/recipeImage/'.$Recipe['image']);
+        }
+
+        foreach ($newRecipes as $Recipe){
+            $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
         }
         $newRecipes = array(
             "recipes" => $newRecipes
@@ -119,6 +124,10 @@ class RecipeController extends Controller
         foreach ($hotRecipes as &$recipe){
             $recipe = $this->addUserName($recipe);
         }
+        foreach ($hotRecipes as $Recipe){
+            $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
+        }
+
         $hotRecipes = array("recipes" => $hotRecipes );
         return json_encode($hotRecipes);
     }

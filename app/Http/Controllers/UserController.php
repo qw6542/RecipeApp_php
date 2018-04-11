@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use function MongoDB\BSON\toJSON;
 
 
 class UserController extends Controller
@@ -88,9 +89,12 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        //
+
+        $user = User::find($request['id']);
+        $user->update(['name' => $request['name']]);
+
     }
 
     /**

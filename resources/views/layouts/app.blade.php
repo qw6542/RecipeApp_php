@@ -12,10 +12,8 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-    <link href='/resources/assets/my.css' rel="stylesheet" type="text/css" >
 </head>
-<body id="mybody">
+<body>
     <div id="app">
         <nav class="navbar navbar-default navbar-static-top">
             <div class="container">
@@ -30,9 +28,8 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('http://localhost:8080/') }}">
-                        {{--{{ config('app.name', 'Laravel') }}--}}
-                        Home
+                    <a class="navbar-brand" href="{{ url('/') }}">
+                        {{ config('app.name', 'Laravel') }}
                     </a>
                 </div>
 

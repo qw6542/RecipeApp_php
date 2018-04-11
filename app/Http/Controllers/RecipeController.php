@@ -6,7 +6,8 @@ use App\Recipe;
 use App\Description;
 use App\Ingredient;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+
+
 class RecipeController extends Controller
 {
     /**
@@ -40,33 +41,49 @@ class RecipeController extends Controller
 
         $recipe = new Recipe();
         $recipe -> title = $recipe_data['title'];
-        $recipe -> image =$filename;
+        $recipe -> image = $filename;
         $recipe -> user_id = $recipe_data['user_id'];
         $recipe -> touch();
 
         $user = User::find($recipe_data['user_id'])->first();
 
-         $user -> recipe() -> save($recipe);
+        $user -> recipe() -> save($recipe);
 
+        $recipe = Recipe::all()->last();
+        foreach($recipe_data['descriptions'] as &$des) {
+            if ($des != []) {
 
-        foreach($recipe_data['descriptions'] as &$des){
-            if($des != [] ) {
                 $description = new Description();
-                $description->step = $des['step'];
-                $description->detail = $des['detail'];
-                $recipe->description()->save($description);
+                if (null !== $des['step']) {
+                    $description->step = $des['step'];
+                    null === $des['detail']? $description->detail = " " :
+                        $description->detail = $des['detail'];
+                    $description->recipe_id = $recipe->id;
+                }
+
+                $description->recipe()->associate($recipe);
+                $description->save();
+
             }
        }
 
        foreach($recipe_data['ingredients'] as &$i) {
-            if($i != [] && $i['name']!= '' ) {
+            if( $i != [] ) {
                 $ingredient = new Ingredient();
-                $ingredient->name = $i['name'];
-                $ingredient->quantity = $i['quantity'];
-                $ingredient->measurement = $i['measurement'];
-                $ingredient->preparation = $i['preparation'];
-                $ingredient->get_from = $i['get_from'];
-                $recipe->ingredient()->save($ingredient);
+                if(null !== $i['name']) {
+                    $ingredient->name = $i['name'];
+                null === $i['quantity']? $ingredient->quantity = " " :
+                     $ingredient->quantity = $i['quantity'];
+                null === $i['measurement']? $ingredient->measurement = " " :
+                     $ingredient->measurement = $i['measurement'];
+                null === $i['preparation']? $ingredient->preparation = " " :
+                    $ingredient->preparation = $i['preparation'];
+                null === $i['get_from']? $ingredient->get_from = " " :
+                    $ingredient->get_from = $i['get_from'];
+
+                    $ingredient->recipe()->associate($recipe);
+                    $ingredient->save();
+                }
             }
        }
 //            if decide to use one to many relationship
@@ -83,11 +100,12 @@ class RecipeController extends Controller
         $recipe_model->update();
 
         $recipe = array( "recipe" => array(
+            "id"=> $recipe_model['id'],
             "created_at"=> substr($recipe_model->created_at,0,19),
             "title"=> $recipe_model->title,
             "user_name"=> $recipe_model->user->first()->name,
             "rating" =>$recipe_model->rating,
-             "image"=> $recipe_model['image'],
+             "image"=> "recipeImage/".$recipe_model['image'],
             "ingredients" => $recipe_model->ingredient,
             "descriptions" =>$recipe_model->description
         ));
@@ -98,9 +116,9 @@ class RecipeController extends Controller
         $item["username"]= User::find($item->user_id)->name;
     }
 
-    public function new( )
+    public function new()
     {
-        $newRecipes = Recipe::all()->sortByDesc('created_at')->take(10);
+        $newRecipes = Recipe::orderBy('created_at')->paginate(5);
 
         foreach ($newRecipes as &$Recipe){
 
@@ -110,15 +128,13 @@ class RecipeController extends Controller
         foreach ($newRecipes as $Recipe){
             $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
         }
-        $newRecipes = array(
-            "recipes" => $newRecipes
-        );
+
         return json_encode($newRecipes);
     }
 
     public function hot( )
     {
-        $hotRecipes = Recipe::all()->sortByDesc('clicks')->take(10);
+        $hotRecipes = Recipe::orderByDesc('clicks')->paginate(5);
         foreach ($hotRecipes as &$recipe){
             $recipe = $this->addUserName($recipe);
         }
@@ -126,7 +142,6 @@ class RecipeController extends Controller
             $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
         }
 
-        $hotRecipes = array("recipes" => $hotRecipes );
         return json_encode($hotRecipes);
     }
      public  function kitchen($id) {
@@ -143,31 +158,17 @@ class RecipeController extends Controller
      */
 
     public function search(Request $request) {
+        $s = $request['search'];
+        $search_data = explode(' ',$s);
+        $result = Recipe::orWhere('title','=',$s)
+            ->orWhere('title','like','%'.$s.'%')
+        ->orWhereHas('ingredient',function ($query) use ($search_data){
+           foreach ($search_data as $i){
+               $query->orWhere('name','like','%'.$i.'%');
+           }
+        })->orderBy('rating')->paginate(5);
 
-        $search_data = explode(" ",$request-> all()['search']);
-        $result = array();
-        foreach ($search_data as $i){
-            $recipe = Recipe::where('title','LIKE', '%'.$i)->get();
-            if ($recipe != null) {
-                array_push($result, $recipe);
-            }
-        }
-        if(sizeof($result) < 5) {
-            foreach ($search_data as $i){
-                $ingredient = Ingredient::where('name','LIKE', '%'.$i)
-                    ->orWhere('name','LIKE', '%'.$i)
-                    ->get();
-                if ($ingredient != null) {
-                    foreach ($ingredient  as $i) {
-                        $recipe = Recipe::find($i->recipe_id);
-                        array_push($result, $recipe);
-                    }
-                }
-            }
-        }
-
-
-        return  json_encode($result);
+         return  json_encode($result);
     }
     public function edit(Recipe $recipe)
     {

@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get('/user',UserController::class.'@getUser');
 Route::post('/register',UserController::class.'@create');
-Route::get('/users/update',UserController::class.'@update' );
+Route::post('/user/update',UserController::class.'@update' );
 Route::get('/favorite',UserController::class.'@favorite');
 Route::get('/kitchen/{id}',RecipeController::class.'@kitchen');
 
@@ -24,7 +24,3 @@ Route::get('/recipes/collections/new',RecipeController::class.'@new' );
 Route::get('/recipes/collections/recent',RecipeController::class.'@recent');
 Route::post('/recipes/create',RecipeController::class.'@create' );
 Route::post('/recipes/search',RecipeController::class.'@search' );
-
-Route::get('dist/{vue_capture?}', function () {
-    return view('vue.index');
-})->where('vue_capture', '[\/\w\.-]*');

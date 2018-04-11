@@ -35,8 +35,8 @@ class RecipeController extends Controller
         else {
             $extension = 'png';
         }
-        $filename = str_random().'.'.$extension;
-        $path = public_path().'/recipeImage/'.$filename;
+        $filename = '/recipeImage/'.str_random().'.'.$extension;
+        $path = public_path().$filename;
         file_put_contents($path,$decoded);
 
         $recipe = new Recipe();
@@ -105,7 +105,7 @@ class RecipeController extends Controller
             "title"=> $recipe_model->title,
             "user_name"=> $recipe_model->user->first()->name,
             "rating" =>$recipe_model->rating,
-             "image"=> "recipeImage/".$recipe_model['image'],
+             "image"=> $recipe_model['image'],
             "ingredients" => $recipe_model->ingredient,
             "descriptions" =>$recipe_model->description
         ));
@@ -118,7 +118,7 @@ class RecipeController extends Controller
 
     public function new()
     {
-        $newRecipes = Recipe::orderBy('created_at')->paginate(5);
+        $newRecipes = Recipe::orderByDesc('created_at')->paginate(5);
 
         foreach ($newRecipes as &$Recipe){
 
@@ -126,7 +126,7 @@ class RecipeController extends Controller
         }
 
         foreach ($newRecipes as $Recipe){
-            $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
+            $Recipe['image'] = asset($Recipe['image']);
         }
 
         return json_encode($newRecipes);
@@ -139,7 +139,7 @@ class RecipeController extends Controller
             $recipe = $this->addUserName($recipe);
         }
         foreach ($hotRecipes as $Recipe){
-            $Recipe['image'] = asset('/recipeImage/'.$Recipe['image']);
+            $Recipe['image'] = asset($Recipe['image']);
         }
 
         return json_encode($hotRecipes);

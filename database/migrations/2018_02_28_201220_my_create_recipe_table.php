@@ -15,11 +15,13 @@ class MyCreateRecipeTable extends Migration
     {
 
         Schema :: create('recipe',function (Blueprint $table){
-            $table -> increments('id') -> unique();
-            $table->integer('clicks') ->default(0);
+            $table -> increments('id')-> unique();
+            $table->integer('clicks')->default(0);
             $table -> string('title');
-            $table -> integer('rating') ->default(0);
+            $table -> integer('rating')->default(0);
             $table -> String('image');
+            $table -> String('method')->default(' ') ;
+            $table -> String('style')->default(' ') ;
             $table -> integer('user_id')->unsigned();;
             $table -> timestamps();
         });

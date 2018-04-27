@@ -43,6 +43,8 @@ class RecipeController extends Controller
         $recipe -> title = $recipe_data['title'];
         $recipe -> image = $filename;
         $recipe -> user_id = $recipe_data['user_id'];
+        $recipe -> method = $recipe_data['method'];
+        $recipe -> style = $recipe_data['style'];
         $recipe -> touch();
 
         $user = User::find($recipe_data['user_id'])->first();
@@ -107,7 +109,9 @@ class RecipeController extends Controller
             "rating" =>$recipe_model->rating,
              "image"=> $recipe_model['image'],
             "ingredients" => $recipe_model->ingredient,
-            "descriptions" =>$recipe_model->description
+            "descriptions" =>$recipe_model->description,
+            "method" => $recipe_model->method,
+            "style" => $recipe_model->style
         ));
         return json_encode($recipe);
     }
